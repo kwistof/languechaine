@@ -126,6 +126,7 @@ class Chroma(VectorStore):
     def add_texts(
         self,
         texts: Iterable[str],
+        embeddings: Optional[List[float]] = None,
         metadatas: Optional[List[dict]] = None,
         ids: Optional[List[str]] = None,
         **kwargs: Any,
@@ -143,8 +144,7 @@ class Chroma(VectorStore):
         # TODO: Handle the case where the user doesn't provide ids on the Collection
         if ids is None:
             ids = [str(uuid.uuid1()) for _ in texts]
-        embeddings = None
-        if self._embedding_function is not None:
+        if embeddings == None and self._embedding_function is not None:
             embeddings = self._embedding_function.embed_documents(list(texts))
         self._collection.add(
             metadatas=metadatas, embeddings=embeddings, documents=texts, ids=ids
@@ -331,6 +331,7 @@ class Chroma(VectorStore):
         cls: Type[Chroma],
         texts: List[str],
         embedding: Optional[Embeddings] = None,
+        embeddings: Optional[List[float]],
         metadatas: Optional[List[dict]] = None,
         ids: Optional[List[str]] = None,
         collection_name: str = _LANGCHAIN_DEFAULT_COLLECTION_NAME,
@@ -363,7 +364,7 @@ class Chroma(VectorStore):
             client_settings=client_settings,
             client=client,
         )
-        chroma_collection.add_texts(texts=texts, metadatas=metadatas, ids=ids)
+        chroma_collection.add_texts(texts=texts, embeddings=embeddings, metadatas=metadatas, ids=ids)
         return chroma_collection
 
     @classmethod
@@ -371,6 +372,7 @@ class Chroma(VectorStore):
         cls: Type[Chroma],
         documents: List[Document],
         embedding: Optional[Embeddings] = None,
+        embeddings: Optional[List[float]],
         ids: Optional[List[str]] = None,
         collection_name: str = _LANGCHAIN_DEFAULT_COLLECTION_NAME,
         persist_directory: Optional[str] = None,
@@ -398,6 +400,7 @@ class Chroma(VectorStore):
         return cls.from_texts(
             texts=texts,
             embedding=embedding,
+            embeddings=embeddings,
             metadatas=metadatas,
             ids=ids,
             collection_name=collection_name,
